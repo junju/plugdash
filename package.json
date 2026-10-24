@@ -7,7 +7,7 @@
 		"smoke": "node --import tsx scripts/smoke.ts",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"lint": "oxlint --ignore-pattern '*.astro' .",
+		"lint": "oxlint --ignore-pattern \"**/*.astro\" .",
 		"format": "oxfmt .",
 		"changeset": "changeset",
 		"version-packages": "changeset version",

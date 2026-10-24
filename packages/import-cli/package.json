@@ -31,11 +31,15 @@
 	"dependencies": {
 		"@plugdash/fromghost": "workspace:*",
 		"@plugdash/fromsubstack": "workspace:*",
-		"emdash": ">=0.38.0"
+		"emdash": ">=0.38.0",
+		"fflate": "^0.8.3",
+		"linkedom": "^0.18.13",
+		"turndown": "^7.2.0",
+		"turndown-plugin-gfm": "^1.0.2"
 	},
 	"devDependencies": {
 		"@types/node": "^20.19.43",
-		"fflate": "^0.8.2",
+		"@types/turndown": "^5.0.5",
 		"vitest": "^2.0.0"
 	},
 	"engines": {

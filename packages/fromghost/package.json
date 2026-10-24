@@ -25,10 +25,14 @@
 		".": {
 			"import": "./dist/index.mjs",
 			"types": "./dist/index.d.mts"
+		},
+		"./export": {
+			"import": "./dist/ghost-export.mjs",
+			"types": "./dist/ghost-export.d.mts"
 		}
 	},
 	"scripts": {
-		"build": "tsdown src/index.ts --dts.eager",
+		"build": "tsdown src/index.ts src/ghost-export.ts --dts.eager",
 		"test": "vitest run",
 		"typecheck": "tsc --noEmit",
 		"lint": "oxlint ."

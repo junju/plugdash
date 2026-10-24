@@ -48,6 +48,61 @@ Ghost exports point at images as `__GHOST_URL__/content/images/...`. Pass `--sit
 
 Ghost posts go into `--collection` (default `posts`). Ghost pages go into `pages` if your site has that collection, and are skipped otherwise.
 
+## Review a Ghost export offline (fork feature)
+
+Before importing into a site that stores Markdown, convert a Ghost JSON or ZIP
+export to local review files. This mode makes no HTTP requests and needs no
+EmDash URL or credentials. The existing site-import path still uses Portable Text.
+
+From this fork's checkout, using pnpm 10 (the repository's build settings use its format):
+
+```sh
+corepack pnpm@10.28.2 install --frozen-lockfile
+corepack pnpm@10.28.2 --filter @plugdash/fromghost build
+corepack pnpm@10.28.2 --filter @plugdash/import build
+node packages/import-cli/dist/cli.mjs ghost /path/to/export.zip --output /path/to/new-preview
+```
+
+The output directory must not exist. `--site-url https://old.example` is optional:
+it identifies absolute image URLs from the old site and resolves Ghost link
+placeholders. Images under `__GHOST_URL__/content/images/` and `/content/images/`
+can be matched to ZIP files without it. External images are left as URLs and
+listed in the report; they are never downloaded. Standard Ghost `/size/wNNN/`
+image paths resolve to their original file. Responsive `srcset` variants are
+retained only in the original HTML; Markdown uses `src`.
+
+Output includes:
+
+- `manifest.json`: original IDs, slugs, statuses, visibility, dates, tags, author
+  bylines (no email), SEO fields, Markdown paths, cover candidates, image mappings.
+- `posts/*.md` and `pages/*.md`: Markdown bodies with filenames derived from ID
+  hashes. Pages remain separate even if the target site has no pages collection.
+- `media/*`: referenced ZIP images, deduplicated by content hash and extension.
+- `originals/*.json`: original HTML, Lexical and Mobiledoc for comparison.
+- `report.json`: counts, conversion warnings, unresolved image references and
+  identical duplicate ZIP entries. Conflicting duplicates are rejected.
+
+The `.incomplete` marker is removed only after all files are written. If it
+exists, the export did not finish and must not be used. Normal write failures
+clean up the newly created output directory; interrupted processes may leave it.
+Choose a fresh directory on every run. Keep output outside Git: it includes
+drafts, restricted posts, original content and author bylines. It does not copy
+the site's settings, full user records or members CSV.
+
+HTML is converted directly, without the Portable Text converter. Tables become
+GFM tables; code, nested lists, image alt text and figure captions are retained.
+Merged table cells and Ghost card layouts need review. Iframes/audio/video become
+links with warnings, rather than raw HTML (Markdown renderers with `html: false`
+cannot display raw embeds). Unsupported active elements are removed and reported.
+Lexical-only content has a lossy plain-text fallback; the original remains available.
+
+This creates review files only. It does not import Markdown, upload images,
+publish posts, choose a single category from multiple tags or create redirects.
+`--output` cannot be combined with site-import flags (`--url`, `--token`,
+`--cookie`, `--collection`, `--field`, `--dry-run`, `--publish`, `--paid-posts-as`).
+Site environment variables are ignored in this mode. Input is limited to
+512 MiB, ZIP expansion to 512 MiB, each entry to 64 MiB and 20,000 entries.
+
 ## Substack
 
 Export from Substack under **Settings > Exports > Create new export**. You get a `.zip` with `posts.csv` and one HTML file per post.

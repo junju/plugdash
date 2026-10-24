@@ -6,6 +6,7 @@ import { ImportError, runImport, type SourceName } from "./import.ts";
 const USAGE = `Usage:
   plugdash-import ghost <export.json> --url <site> --token <token> [--site-url <old ghost site>]
   plugdash-import substack <export.zip> --url <site> --token <token>
+  plugdash-import ghost <export.zip|export.json> --output <new-directory> [--site-url <old ghost site>]
 
 Options:
   --url <url>          EmDash site to import into (or EMDASH_URL)
@@ -14,6 +15,7 @@ Options:
   --site-url <url>     Ghost only: the old site, to download __GHOST_URL__ images
   --collection <slug>  Collection for posts (default: posts)
   --field <slug>       Portable Text field for the body (default: content)
+  --output <directory> Ghost only: export Markdown, local images and a review report offline
   --dry-run            Show what would be imported, write nothing
   --publish            Publish posts that were published at the source (default: drafts)
   --paid-posts-as <draft|publish>
@@ -33,6 +35,7 @@ async function main(argv: string[]): Promise<number> {
 				"site-url": { type: "string" },
 				collection: { type: "string" },
 				field: { type: "string" },
+				output: { type: "string" },
 				"dry-run": { type: "boolean" },
 				publish: { type: "boolean" },
 				"paid-posts-as": { type: "string" },
@@ -50,6 +53,40 @@ async function main(argv: string[]): Promise<number> {
 	}
 
 	const [source, file] = positionals;
+	if (values.output !== undefined) {
+		if (source !== "ghost" || !file || !values.output || positionals.length !== 2) {
+			console.error("--output requires ghost <export.zip|export.json> and a new output directory.");
+			return 1;
+		}
+		if (
+			["url", "token", "cookie", "collection", "field", "dry-run", "publish", "paid-posts-as"].some(
+				(key) => values[key as keyof typeof values] !== undefined,
+			)
+		) {
+			console.error(
+				"--output cannot be combined with site import options. It only writes local review files.",
+			);
+			return 1;
+		}
+		try {
+			const { exportGhostPreview } = await import("./ghost-preview.ts");
+			const report = await exportGhostPreview({
+				file,
+				output: values.output,
+				siteUrl: values["site-url"],
+			});
+			console.log(
+				`Exported ${report.counts.posts} posts, ${report.counts.pages} pages and ${report.counts.mediaFiles} images to ${values.output}`,
+			);
+			console.log(
+				`${report.warnings.length} warnings; ${report.unresolvedImages.length} unresolved image references. Review report.json before importing.`,
+			);
+			return 0;
+		} catch (error) {
+			console.error((error as Error).message);
+			return 1;
+		}
+	}
 	const url = values.url ?? process.env["EMDASH_URL"];
 	const token = values.token ?? process.env["EMDASH_TOKEN"];
 	if ((source !== "ghost" && source !== "substack") || !file || !url) {

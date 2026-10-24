@@ -26,6 +26,10 @@ Each plugin does one thing, ships a companion Astro component that works with no
 
 ## Install
 
+This fork adds an [offline Ghost ZIP/JSON to Markdown review command](./packages/import-cli/README.md#review-a-ghost-export-offline-fork-feature)
+to `@plugdash/import`. It writes local Markdown, referenced images and a report
+without connecting to EmDash. The online importer continues to use Portable Text.
+
 ```bash
 pnpm add @plugdash/heartpost
 ```

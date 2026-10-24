@@ -11,6 +11,11 @@ API. Remove the plugin after the import.
 
 ## Install
 
+For local Markdown review files from a Ghost ZIP or JSON export, see
+[`@plugdash/import`'s offline output mode](../import-cli/README.md#review-a-ghost-export-offline-fork-feature).
+The pure JSON parser is also available from `@plugdash/fromghost/export` without
+loading EmDash or registering a plugin. The plugin itself still produces Portable Text.
+
 ```bash
 pnpm add @plugdash/fromghost
 ```

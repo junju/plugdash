@@ -89,6 +89,25 @@ Never let formatting pile up. Run `pnpm format` before committing.
 
 ## confirmed API facts
 
+### confirmed 2026-10-24 while adding offline Ghost Markdown review
+
+- Ghost 6 exports can be a ZIP with root `export.json` using `{ meta, data }`.
+  ZIPs may contain identical duplicate entries (observed `content/settings/routes.yaml`).
+  Do not use a name-keyed unzip API that silently discards conflicting duplicates.
+- The target my-blog site (EmDash 1.3.1) stores Markdown in `posts.body`, text
+  descriptions in `description`, and image values in `cover`. It uses markdown-it
+  with `html: false`, so raw iframe HTML cannot preserve embeds there.
+- Offline review uses the pure `@plugdash/fromghost/export` parser subpath and
+  converts original HTML directly, avoiding loss from a Portable Text intermediary.
+  It does not exercise any EmDash API. Confirm online API compatibility separately.
+- turndown-plugin-gfm needs `HTMLTableElement.rows`, absent from linkedom.
+  Pass sanitized HTML strings to Turndown rather than linkedom DOM nodes.
+- Windows directory rename failed for the real multi-file export. Reserve a new
+  output directory with exclusive mkdir and leave `.incomplete` until finished;
+  never overwrite or recursively remove a directory that existed before the run.
+- Quote lint exclusion globs with double quotes in package scripts so Windows
+  cmd does not pass literal single quotes to oxlint.
+
 Verified against the actual EmDash source while building @plugdash/readtime.
 These supersede anything in plugin specs if there is a conflict.
 
