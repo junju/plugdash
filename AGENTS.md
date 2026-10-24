@@ -89,6 +89,30 @@ Never let formatting pile up. Run `pnpm format` before committing.
 
 ## confirmed API facts
 
+### confirmed 2026-10-24 during a real local import on EmDash 1.3.1
+
+- The offline CLI is still an exporter, not an online Markdown importer. A
+  separate local-only integration script imported its manifest into my-blog.
+- POST `/admin/bylines` returns the byline directly in `data`, while content
+  and media creation return `data.item`. Entry tag assignments are read from
+  GET `/content/:collection/:id/terms/:taxonomy`, not the main content response.
+- Collections with `hasSeo: false` reject even `seo: {}` on content creation.
+  Omit absent SEO instead of sending an empty object.
+- A required text field rejects the empty string even when creating a draft.
+  The one empty source draft was stored as a newline, noted in the local receipt.
+- ICO is not in the default media upload allowlist. Ten referenced ICOs were
+  decoded to PNG; two extensionless source assets were identified as GIF/PNG.
+  Do not send application/octet-stream or trust only a source filename suffix.
+- The real API preserved original createdAt/publishedAt, explicit author bylines,
+  and nine tag assignments across 48 source entries. The original updatedAt is
+  retained in the receipt, not overridden in EmDash by this experiment.
+- 24 published article pages and 23 anonymous draft 404s were verified; 46 media
+  URLs were readable anonymously. Browser checks loaded 43 local images across
+  all 24 published articles. A rerun created no additional articles or media.
+- The imported page is in a non-routable pages collection, accessible through
+  admin only until a front-end route exists. Local schema changes automatically
+  regenerate the target site's emdash-env.d.ts.
+
 ### confirmed 2026-10-24 while adding offline Ghost Markdown review
 
 - Ghost 6 exports can be a ZIP with root `export.json` using `{ meta, data }`.
